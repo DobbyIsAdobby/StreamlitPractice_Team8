@@ -1,10 +1,18 @@
-# Track4
-# st.write("### Task 4:인터랙티브 필터")
-# AI 활용
-
 import streamlit as st
 import pandas as pd
 import altair as alt
+
+#title
+st.header("Task 2: 데이터 표시하기")
+st.write("데이터프레임")
+
+df= pd.read_csv("penguins.csv", encoding="utf-8")
+st.dataframe(df)
+
+
+# Track4
+# st.write("### Task 4:인터랙티브 필터")
+# AI 활용
 
 st.title("🐧 Penguin Dataset Interactive Filter & Visualization (Altair Only)")
 
@@ -139,3 +147,15 @@ if uploaded_file:
                 )
             )
             st.altair_chart(chart, use_container_width=True)
+
+#title
+st.title('Task5: 파일 업로드')
+
+uploaded_file = st.file_uploader("Upload Your data", type="csv")
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
+    st.write("Uploaded Data")
+    st.write(df)
+
