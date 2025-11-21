@@ -22,14 +22,14 @@ agree = st.checkbox("이용 약관에 동의합니다")
 st.button("제출")
 
 # Task2
-st.header("Task 2: 데이터 표시하기")
+st.subheader("Task 2: 데이터 표시하기")
 st.write("데이터프레임")
 
 df= pd.read_csv("penguins.csv", encoding="utf-8")
 st.dataframe(df)
 
 # Task 3
-st.header("Task 3: 차트 그리기")
+st.subheader("Task 3: 차트 그리기")
 df= pd.read_csv("penguins.csv")
 all_cols= df.columns.tolist()
 
@@ -40,8 +40,8 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-st.markdown("###### 📍모든 컬럼 목록")
-st.markdown("\n".join([f"- **{col}**" for col in all_cols]))
+with st.expander("###### 📍모든 컬럼 목록"):
+    st.markdown("\n".join([f"- **{col}**" for col in all_cols]))
 
 selected_col= st.selectbox("그래프로 볼 컬럼을 선택하세요: ", all_cols)
 st.markdown(f"###### > 선택된 칼럼: {selected_col}")
@@ -63,10 +63,8 @@ else:
     st.bar_chart(counts)
 
 # Task 4
-st.write("Task 4: 인터랙티브 필터")
+st.subheader("Task 4: 인터랙티브 필터")
 # AI 활용
-
-#st.title("🐧 Penguin Dataset Interactive Filter & Visualization (Altair Only)")
 
 uploaded_file = st.file_uploader("CSV 파일을 업로드하세요.", type=["csv"])
 
@@ -203,7 +201,7 @@ if uploaded_file:
 
 
 # Task 5
-st.title('Task5: 파일 업로드')
+st.subheader('Task5: 파일 업로드')
 
 uploaded_file = st.file_uploader("Upload Your data", type="csv")
 
@@ -213,3 +211,141 @@ if uploaded_file is not None:
     st.write("Uploaded Data")
     st.write(df)
 
+# Task 6 - AI 활용
+st.subheader("Task 6: 레이아웃 구성 (Layout)")
+
+# 1. Expander (접고 펼치기)
+with st.expander("Task 6 설명 보기 (클릭하세요)"):
+    st.write("""
+    이 영역은 **Expander**입니다. 
+    공간을 절약하거나 부가적인 설명을 숨겨둘 때 유용합니다.
+    - **Columns**: 화면을 세로로 분할합니다.
+    - **Tabs**: 탭을 사용하여 내용을 구분합니다.
+    """)
+
+# 데이터가 있는지 확인 (Task 5나 Task 2에서 df가 로드되었을 것임)
+if 'df' in locals() and not df.empty:
+    
+    # 2. Tabs (탭 구성)
+    tab1, tab2, tab3 = st.tabs(["📊 요약 지표 (Columns)", "📋 데이터 미리보기", "📝 텍스트 분석"])
+
+    # Tab 1: 요약 지표 (Columns 사용)
+    with tab1:
+        st.subheader("주요 수치 요약")
+        
+        # 숫자형 데이터만 선택해서 평균 계산 (에러 방지)
+        numeric_df = df.select_dtypes(include=['float64', 'int64'])
+        
+        if not numeric_df.empty:
+            # 3. Columns (화면 분할) - 3개의 컬럼으로 나눔
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                # 첫 번째 컬럼: 첫 번째 숫자형 컬럼의 평균
+                col_name = numeric_df.columns[0]
+                avg_val = numeric_df[col_name].mean()
+                st.metric(label=f"평균 {col_name}", value=f"{avg_val:.2f}")
+
+            with col2:
+                # 두 번째 컬럼 (데이터가 있다면)
+                if len(numeric_df.columns) > 1:
+                    col_name = numeric_df.columns[1]
+                    avg_val = numeric_df[col_name].mean()
+                    st.metric(label=f"평균 {col_name}", value=f"{avg_val:.2f}")
+
+            with col3:
+                # 세 번째 컬럼: 전체 데이터 개수
+                st.metric(label="전체 데이터 수", value=f"{len(df)} 개")
+        else:
+            st.warning("요약할 숫자형 데이터가 없습니다.")
+
+    # Tab 2: 데이터 미리보기
+    with tab2:
+        st.subheader("원본 데이터 (상위 5개)")
+        st.dataframe(df.head())
+
+    # Tab 3: 기타 텍스트
+    with tab3:
+        st.subheader("데이터 컬럼 정보")
+        st.write(df.columns.tolist())
+
+else:
+    st.error("데이터가 로드되지 않았습니다. Task 5에서 파일을 업로드하거나 Task 2 코드를 확인하세요.")
+
+# Task 7 - AI 활용
+st.subheader("Task 7: 종합 대시보드 (Dashboard)")
+
+# 데이터가 없는 경우를 대비해 다시 로드 (안전장치)
+if 'df' not in locals():
+    df = pd.read_csv("penguins.csv")
+
+# 1. 사이드바 구성 (필터링 컨트롤)
+st.sidebar.header("🔍 대시보드 필터 (Task 7)")
+
+# 사이드바: 종(Species) 선택
+species_list = df['species'].unique().tolist()
+selected_species = st.sidebar.multiselect(
+    "종을 선택하세요", 
+    species_list, 
+    default=species_list # 기본값: 전체 선택
+)
+
+# 사이드바: 섬(Island) 선택
+island_list = df['island'].unique().tolist()
+selected_island = st.sidebar.multiselect(
+    "서식지(섬)를 선택하세요", 
+    island_list, 
+    default=island_list
+)
+
+# 2. 데이터 필터링 로직
+filtered_dashboard_df = df[
+    (df['species'].isin(selected_species)) & 
+    (df['island'].isin(selected_island))
+]
+
+# 3. 메인 화면 구성
+if filtered_dashboard_df.empty:
+    st.warning("선택된 조건에 맞는 데이터가 없습니다.")
+else:
+    # (1) KPI 지표 (Metrics) - 3단 컬럼
+    st.subheader("📊 핵심 지표")
+    kpi1, kpi2, kpi3 = st.columns(3)
+    
+    with kpi1:
+        st.metric("검색된 펭귄 수", f"{len(filtered_dashboard_df)} 마리")
+    
+    with kpi2:
+        avg_mass = filtered_dashboard_df['body_mass_g'].mean()
+        st.metric("평균 몸무게", f"{avg_mass:.1f} g")
+        
+    with kpi3:
+        avg_bill = filtered_dashboard_df['bill_length_mm'].mean()
+        st.metric("평균 부리 길이", f"{avg_bill:.1f} mm")
+    
+    st.markdown("---") # 구분선
+
+    # (2) 차트 영역 - 2단 컬럼
+    st.subheader("📈 데이터 시각화")
+    chart_col1, chart_col2 = st.columns(2)
+    
+    with chart_col1:
+        st.caption("종별 개체수 (Bar Chart)")
+        # 종별 개수 계산
+        species_counts = filtered_dashboard_df['species'].value_counts()
+        st.bar_chart(species_counts)
+        
+    with chart_col2:
+        st.caption("부리 길이 vs 깊이 (Scatter Plot)")
+        # Altair를 이용한 산점도
+        scatter_chart = alt.Chart(filtered_dashboard_df).mark_circle().encode(
+            x='bill_length_mm',
+            y='bill_depth_mm',
+            color='species',
+            tooltip=['species', 'island', 'bill_length_mm']
+        ).interactive()
+        st.altair_chart(scatter_chart, use_container_width=True)
+
+    # (3) 상세 데이터 (Expander)
+    with st.expander("📋 상세 데이터 보기 (클릭)"):
+        st.dataframe(filtered_dashboard_df)
